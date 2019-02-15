@@ -1,0 +1,52 @@
+﻿<Page
+    x:Class="RichTextBoxResearch.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:RichTextBoxResearch"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Grid Padding="20,0,20,0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="100"></RowDefinition>
+            <RowDefinition></RowDefinition>
+        </Grid.RowDefinitions>
+
+        <TextBlock Style="{StaticResource HeaderTextBlockStyle}"
+                   Grid.Row="0"
+                   VerticalAlignment="Center">
+            Rich TextBox control research page
+        </TextBlock>
+
+        <RelativePanel Grid.Row="1">
+            <RelativePanel.Resources>
+                <Style TargetType="Button">
+                    <Setter Property="Margin" Value="0,0,10,0"></Setter>
+                </Style>
+            </RelativePanel.Resources>
+
+            <Button x:Name="BoldButton" Click="BoldButton_Click">Font Bold</Button>
+            <Button x:Name="ItalicButton" RelativePanel.RightOf="BoldButton">Font Italic</Button>
+            <Button x:Name="ToRtfButton" RelativePanel.RightOf="ItalicButton">Text to RTF</Button>
+            <Button x:Name="ToHtmlButton" RelativePanel.RightOf="ToRtfButton" Click="ToHtmlButton_Click">RTF to HTML</Button>
+            <Button x:Name="SaveButton" RelativePanel.RightOf="ToHtmlButton" Click="SaveButton_ClickAsync">Save to RTF</Button>
+            <Button x:Name="ViewRawTextButton" RelativePanel.RightOf="SaveButton" Click="ViewRawTextButton_Click">View Raw text</Button>
+
+            <TextBlock x:Name="InfoTitle" RelativePanel.Below="BoldButton"
+                       VerticalAlignment="Center" Margin="0,10,0,0">
+                Below is the RichEditBox.
+            </TextBlock>
+
+            <RichEditBox x:Name="RichEditBoxTest" Height="300"
+                         RelativePanel.Below="InfoTitle" 
+                         RelativePanel.AlignLeftWithPanel="True"
+                         RelativePanel.AlignRightWithPanel="True"></RichEditBox>
+
+            <TextBlock x:Name="RawTextBlock" 
+                       Margin="0,10,0,0"
+                       RelativePanel.Below="RichEditBoxTest"></TextBlock>
+        </RelativePanel>
+    </Grid>
+</Page>
