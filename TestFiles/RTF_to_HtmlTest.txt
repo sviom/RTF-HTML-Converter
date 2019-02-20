@@ -1,0 +1,46 @@
+﻿{
+    \rtf1
+    \fbidis
+    \ansi
+    \ansicpg949
+    \deff0
+    \nouicompat
+    \deflang1033
+    \deflangfe1042
+    {
+        \fonttbl
+        {
+            \f0
+            \fnil
+            \fcharset129 
+            Malgun Gothic;
+        }
+        {
+            \f1
+            \fnil 
+            Malgun Gothic;
+        }
+    }
+    {
+        \colortbl ;
+        \red0\green0\blue0;
+    }
+    {
+        \*\generator Riched20 10.0.17763
+    }
+    \viewkind4
+    \uc1 
+    \pard
+    \tx720
+    \cf1
+    \f0
+    \fs21
+    \lang1042 
+    TestText
+    \par
+    \b 
+        TestBold
+    \b0
+    \f1
+    \par
+}

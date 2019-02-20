@@ -1,5 +1,5 @@
 ﻿<Page
-    x:Class="RichTextBoxResearch.MainPage"
+    x:Class="RichTextBoxResearch.HtmlToRtf"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:RichTextBoxResearch"
@@ -8,10 +8,10 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    <Grid Padding="20,0,20,0">
+    <Grid Margin="20,0,20,0">
         <Grid.RowDefinitions>
             <RowDefinition Height="100"></RowDefinition>
-            <RowDefinition></RowDefinition>
+            <RowDefinition></RowDefinition>            
         </Grid.RowDefinitions>
 
         <Grid Grid.Row="0">
@@ -19,18 +19,18 @@
                 <ColumnDefinition Width="7*"></ColumnDefinition>
                 <ColumnDefinition Width="3*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
-            
+
             <TextBlock Style="{StaticResource HeaderTextBlockStyle}"
                    Grid.Column="0"
                    VerticalAlignment="Center">
-                RTF to HTML 
+                HTML to RTF
             </TextBlock>
-            <Button x:Name="MoveToHtmltoRTFpage" Margin="20,0,0,0" Grid.Column="1"
-                    Click="MoveToHtmltoRTFpage_Click"
+            <Button x:Name="MoveToMainPage" Margin="20,0,0,0" Grid.Column="1"
+                    Click="MoveToMainPage_Click"
                     HorizontalAlignment="Right"
-                    Content="move HtmlToRTF" />
+                    VerticalAlignment="Center"
+                    Content="move RTFtoHtml" />
         </Grid>
-        
 
         <RelativePanel Grid.Row="1">
             <RelativePanel.Resources>
@@ -39,21 +39,17 @@
                 </Style>
             </RelativePanel.Resources>
 
-            <Button x:Name="BoldButton" Click="BoldButton_Click">Font Bold</Button>
-            <Button x:Name="ItalicButton" RelativePanel.RightOf="BoldButton">Font Italic</Button>
-            <Button x:Name="ToRtfButton" RelativePanel.RightOf="ItalicButton" Click="ToRtfButton_Click">Text to RTF</Button>
-            <Button x:Name="ToHtmlButton" RelativePanel.RightOf="ToRtfButton" Click="ToHtmlButton_Click">RTF to HTML</Button>
-            <Button x:Name="SaveButton" RelativePanel.RightOf="ToHtmlButton" Click="SaveButton_ClickAsync">Save to RTF</Button>
+            <Button x:Name="ConvertHtmlToRtf" Click="ConvertHtmlToRtf_Click">Html to RTF</Button>
 
-            <TextBlock x:Name="InfoTitle" RelativePanel.Below="BoldButton"
+            <TextBlock x:Name="InfoTitle" RelativePanel.Below="ConvertHtmlToRtf"
                        VerticalAlignment="Center" Margin="0,10,0,0">
-                Below is the RichEditBox.
+                Please enter the HTML code in this field.
             </TextBlock>
 
-            <RichEditBox x:Name="RichEditBoxTest" Height="200"
+            <TextBox x:Name="RichEditBoxTest" Height="200"
                          RelativePanel.Below="InfoTitle" 
                          RelativePanel.AlignLeftWithPanel="True"
-                         RelativePanel.AlignRightWithPanel="True"></RichEditBox>
+                         RelativePanel.AlignRightWithPanel="True"></TextBox>
 
             <TextBlock x:Name="RtfRawTextTitle" RelativePanel.Below="RichEditBoxTest"
                        VerticalAlignment="Center" Margin="0,10,0,0">
@@ -69,32 +65,18 @@
             </ScrollViewer>
 
 
-            <TextBlock x:Name="WebViewTitle" RelativePanel.Below="RawTextBlockScroll"
+            <TextBlock x:Name="RichEditBoxTitle" RelativePanel.Below="RawTextBlockScroll"
                        VerticalAlignment="Center" Margin="0,10,0,0">
-                Text to RTF to Html.
+                Below is the RichEditBox.
             </TextBlock>
-            <ScrollViewer x:Name="HtmlViewerScroller" BorderBrush="LightGray" BorderThickness="2"
+            <RichEditBox x:Name="HtmlViewerScroller" BorderBrush="LightGray" BorderThickness="2"
                           Margin="0,0,0,20" 
-                          RelativePanel.Below="WebViewTitle"
-                          RelativePanel.AlignRightWith="MiddleDivider"
+                          RelativePanel.Below="RichEditBoxTitle"
                           RelativePanel.AlignLeftWithPanel="True"
-                          RelativePanel.AlignBottomWithPanel="True">
-                <WebView x:Name="RtfToHtmlViewer"></WebView>
-            </ScrollViewer>
-
-            <Line x:Name="MiddleDivider"
-                  RelativePanel.Below="WebViewTitle"
-                  RelativePanel.AlignBottomWithPanel="True"
-                  RelativePanel.AlignHorizontalCenterWithPanel="True"></Line>
-            
-            <ScrollViewer x:Name="HtmlCodeViewerScroller" BorderBrush="LightBlue" BorderThickness="2"
-                          Margin="10,0,0,20"
-                          RelativePanel.Below="WebViewTitle"
-                          RelativePanel.AlignLeftWith="MiddleDivider"
                           RelativePanel.AlignRightWithPanel="True"
-                          RelativePanel.AlignBottomWithPanel="True">
-                <TextBlock x:Name="HtmlCodeViewer" TextWrapping="Wrap"></TextBlock>
-            </ScrollViewer>
+                          RelativePanel.AlignBottomWithPanel="True">                
+            </RichEditBox>
+
 
         </RelativePanel>
     </Grid>

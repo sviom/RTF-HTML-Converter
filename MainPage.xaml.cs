@@ -1,13 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using RichTextBoxResearch.Converter;
+using Windows.ApplicationModel.DataTransfer;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.Storage;
 using Windows.Storage.Pickers;
 using Windows.Storage.Provider;
+using Windows.Storage.Streams;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -68,19 +72,66 @@ namespace RichTextBoxResearch
 
         }
 
-        private void ViewRawTextButton_Click(object sender, RoutedEventArgs e)
-        {
-            RichEditBoxTest.Document.GetText(Windows.UI.Text.TextGetOptions.AdjustCrlf, out string rawText);
-            RawTextBlock.Text = rawText;
-        }
-
         /// <summary>
         /// RTF형식을 Html 형식으로
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void ToHtmlButton_Click(object sender, RoutedEventArgs e)
+        private async void ToHtmlButton_Click(object sender, RoutedEventArgs e)
         {
+            RichEditBoxTest.Document.GetText(Windows.UI.Text.TextGetOptions.FormatRtf, out string fvff);
+            string htmlcode = await RtfToHtmlConverter.ParseRtfText(fvff);
+
+            var storageFolder = Windows.Storage.ApplicationData.Current.LocalFolder;
+            // WebView navigation은 LoaclFolder 바로 밑에서는 동작하지 않아 폴더 새로 만들어줌
+            var testFolder = await storageFolder.CreateFolderAsync("TestFolder", CreationCollisionOption.ReplaceExisting);
+            var testHtmlFile = await testFolder.CreateFileAsync("rtftohtmltestpage.html", CreationCollisionOption.ReplaceExisting);
+            await FileIO.WriteTextAsync(testHtmlFile, htmlcode);
+
+            RtfToHtmlViewer.Navigate(new Uri("ms-appdata:///local/TestFolder/rtftohtmltestpage.html"));
+
+            // Html code 출력
+            HtmlCodeViewer.Text = htmlcode;
+        }
+
+        /// <summary>
+        /// Html 텍스트를 RTF 또는 RichEditBox에 직접 넣기
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private async void ToRtfButton_Click(object sender, RoutedEventArgs e)
+        {
+            // RTF 형식 데이터 얻어오기
+            byte[] bytes;
+            using (var memory = new InMemoryRandomAccessStream())
+            {
+                RichEditBoxTest.Document.SaveToStream(Windows.UI.Text.TextGetOptions.FormatRtf, memory);
+                var streamToSave = memory.AsStream();
+                var dataReader = new DataReader(streamToSave.AsInputStream());
+                bytes = new byte[streamToSave.Length];
+
+                await dataReader.LoadAsync((uint)streamToSave.Length);
+
+                dataReader.ReadBytes(bytes);
+            }
+
+            string result = System.Text.Encoding.UTF8.GetString(bytes);
+            RawTextBlock.Text = result;
+
+            // Clipboard에 복사
+            // var data = new DataPackage();
+            // data.SetText(result);
+            // Clipboard.SetContent(data);
+        }
+
+        /// <summary>
+        /// 다른페이지로 이동
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void MoveToHtmltoRTFpage_Click(object sender, RoutedEventArgs e)
+        {
+            this.Frame.Navigate(typeof(HtmlToRtf));
         }
     }
 }
