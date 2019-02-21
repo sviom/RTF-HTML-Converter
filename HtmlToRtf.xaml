@@ -10,7 +10,7 @@
 
     <Grid Margin="20,0,20,0">
         <Grid.RowDefinitions>
-            <RowDefinition Height="100"></RowDefinition>
+            <RowDefinition Height="80"></RowDefinition>
             <RowDefinition></RowDefinition>            
         </Grid.RowDefinitions>
 
@@ -46,17 +46,20 @@
                 Please enter the HTML code in this field.
             </TextBlock>
 
-            <TextBox x:Name="RichEditBoxTest" Height="200"
-                         RelativePanel.Below="InfoTitle" 
-                         RelativePanel.AlignLeftWithPanel="True"
-                         RelativePanel.AlignRightWithPanel="True"></TextBox>
+            <TextBox x:Name="HtmlTextCodeBox" Height="200"
+                     TextWrapping="Wrap"
+                     AcceptsReturn="True"
+                     ScrollViewer.VerticalScrollBarVisibility="Auto"
+                     RelativePanel.Below="InfoTitle" 
+                     RelativePanel.AlignLeftWithPanel="True"
+                     RelativePanel.AlignRightWithPanel="True"></TextBox>
 
-            <TextBlock x:Name="RtfRawTextTitle" RelativePanel.Below="RichEditBoxTest"
+            <TextBlock x:Name="RtfRawTextTitle" RelativePanel.Below="HtmlTextCodeBox"
                        VerticalAlignment="Center" Margin="0,10,0,0">
                 RTF Raw text.
             </TextBlock>
             <ScrollViewer x:Name="RawTextBlockScroll" 
-                          Margin="0,0,0,0" Height="200"
+                          Margin="0,0,0,0" Height="150"
                           BorderBrush="LightGray" BorderThickness="2"
                           RelativePanel.AlignRightWithPanel="True"
                           RelativePanel.AlignLeftWithPanel="True"
@@ -69,7 +72,7 @@
                        VerticalAlignment="Center" Margin="0,10,0,0">
                 Below is the RichEditBox.
             </TextBlock>
-            <RichEditBox x:Name="HtmlViewerScroller" BorderBrush="LightGray" BorderThickness="2"
+            <RichEditBox x:Name="RichEditBoxFromHtml" BorderBrush="LightGray" BorderThickness="2"
                           Margin="0,0,0,20" 
                           RelativePanel.Below="RichEditBoxTitle"
                           RelativePanel.AlignLeftWithPanel="True"

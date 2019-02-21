@@ -12,6 +12,7 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
+using HtmlAgilityPack;
 
 // 빈 페이지 항목 템플릿에 대한 설명은 https://go.microsoft.com/fwlink/?LinkId=234238에 나와 있습니다.
 
@@ -34,7 +35,11 @@ namespace RichTextBoxResearch
 
         private void ConvertHtmlToRtf_Click(object sender, RoutedEventArgs e)
         {
+            var rawHtmlCode = HtmlTextCodeBox.Text;
 
+            var rtfCode  = HtmlToRtfConverter.ParseHtmlText(rawHtmlCode);
+            RawTextBlock.Text = rtfCode;
+            RichEditBoxFromHtml.TextDocument.SetText(Windows.UI.Text.TextSetOptions.FormatRtf, rtfCode);
         }
     }
 }

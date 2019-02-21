@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RichTextBoxResearch.Converter
+namespace RichTextBoxResearch
 {
 
     public static class RtfSpec
@@ -308,17 +308,55 @@ namespace RichTextBoxResearch.Converter
             return returnValue;
         }
 
-        public static void CheckExitRules(string rtfCode)
+        /// <summary>
+        /// Attribute 내용으로 RTF Code 만들기
+        /// </summary>
+        /// <param name="attributeName"></param>
+        /// <param name="attributeValue"></param>
+        /// <returns></returns>
+        public static (string header, string footer) GetRtfCodeFromCss(string attributeName, string attributeValue)
         {
-            bool returnValue = false;
-            switch (rtfCode)
+            var rtfCode = (header: "", footer: "");
+            switch (attributeName)
             {
-                case TagUnderLine:
-                    returnValue = true;
+                case "font-weight":
+                    rtfCode = GetRTFCodeFromAttribute(attributeValue);
+                    break;
+                case "text-decoration":
+                    rtfCode = GetRTFCodeFromAttribute(attributeValue);
+                    break;
+                default:
                     break;
             }
 
-            //return returnValue;
+            return rtfCode;
+        }
+
+        /// <summary>
+        /// Attribute Value 값으로 RTF Code 만들기
+        /// </summary>
+        /// <param name="attributeValue">Attribute value(ex. bold)</param>
+        /// <returns>RTF code(ex. \b Example \b0)</returns>
+        public static (string, string) GetRTFCodeFromAttribute(string attributeValue)
+        {
+            var rtfCode = (header: "", footer: "");
+            switch (attributeValue)
+            {
+                case "bold":
+                    rtfCode = ("\\b ", "\\b0");
+                    //rtfCode = "\\b" + nodeValue + "\\b0";
+                    break;
+                case "underline":
+                    rtfCode = ("\\ul ", "\\ulnone");
+                    //rtfCode = "\\ul" + nodeValue + "\\ulnone";
+                    break;
+            }
+
+            return rtfCode;
+        }
+
+        public static void GetRtfCodeFromHtmlTag()
+        {
         }
 
     } // class RtfSpec
