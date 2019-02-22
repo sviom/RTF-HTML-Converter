@@ -106,7 +106,9 @@ namespace RichTextBoxResearch.Converter
             // 시작점 찾기
             for (int i = 0; i < attributeList.Count; i++)
             {
-                if (Regex.IsMatch(attributeList[i], @"\\lang[0-9*]"))
+                //if (Regex.IsMatch(attributeList[i], @"\\lang[0-9*]"))
+                //    startPoint = i;
+                if (Regex.IsMatch(attributeList[i], @"\\viewkind[0-9*]"))
                     startPoint = i;
             }
 
@@ -134,9 +136,23 @@ namespace RichTextBoxResearch.Converter
             return htmlText;
         }
 
-        public static void ParseHtmlText()
+        public static string ParseHtmlText(string rtfHtmlCode)
         {
-            string htmlText = "";
+            var stringBuilder = new StringBuilder();
+            stringBuilder.Append(DefaultHeader);
+            stringBuilder.Append("<html>");
+            stringBuilder.Append("<head>");
+            stringBuilder.Append("<meta charset=\"utf-8\" />");
+            stringBuilder.Append("<title>RTF to Html Test page</title>");
+            stringBuilder.Append("</head>");
+            stringBuilder.Append("<body>");
+
+            stringBuilder.Append(rtfHtmlCode);
+
+            stringBuilder.Append("</body>");
+            stringBuilder.Append("</html>");
+
+            return stringBuilder.ToString();
         }
     }
 

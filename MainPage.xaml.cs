@@ -19,6 +19,8 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
+using RtfPipe;
+using System.Text;
 
 // 빈 페이지 항목 템플릿에 대한 설명은 https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x412에 나와 있습니다.
 
@@ -79,19 +81,33 @@ namespace RichTextBoxResearch
         /// <param name="e"></param>
         private async void ToHtmlButton_Click(object sender, RoutedEventArgs e)
         {
-            RichEditBoxTest.Document.GetText(Windows.UI.Text.TextGetOptions.FormatRtf, out string fvff);
-            string htmlcode = await RtfToHtmlConverter.ParseRtfText(fvff);
+            using (var memory = new InMemoryRandomAccessStream())
+            {
+                RichEditBoxTest.Document.SaveToStream(Windows.UI.Text.TextGetOptions.FormatRtf, memory);
+                var streamToSave = memory.AsStream();
 
-            var storageFolder = Windows.Storage.ApplicationData.Current.LocalFolder;
-            // WebView navigation은 LoaclFolder 바로 밑에서는 동작하지 않아 폴더 새로 만들어줌
-            var testFolder = await storageFolder.CreateFolderAsync("TestFolder", CreationCollisionOption.ReplaceExisting);
-            var testHtmlFile = await testFolder.CreateFileAsync("rtftohtmltestpage.html", CreationCollisionOption.ReplaceExisting);
-            await FileIO.WriteTextAsync(testHtmlFile, htmlcode);
+                Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
-            RtfToHtmlViewer.Navigate(new Uri("ms-appdata:///local/TestFolder/rtftohtmltestpage.html"));
+                TextReader textReader = new StreamReader(streamToSave, Encoding.UTF8);
 
-            // Html code 출력
-            HtmlCodeViewer.Text = htmlcode;
+
+                // RTFPipe 라이브러리 사용
+                var libHtml = Rtf.ToHtml(new RtfSource(textReader));
+                libHtml = RtfToHtmlConverter.ParseHtmlText(libHtml);
+                // Html code 출력
+                HtmlCodeViewer.Text = libHtml;
+
+                var storageFolder = ApplicationData.Current.LocalFolder;
+                // WebView navigation은 LoaclFolder 바로 밑에서는 동작하지 않아 폴더 새로 만들어줌
+                var testFolder = await storageFolder.CreateFolderAsync("TestFolder", CreationCollisionOption.ReplaceExisting);
+                var testHtmlFile = await testFolder.CreateFileAsync("rtftohtmltestpage.html", CreationCollisionOption.ReplaceExisting);
+                await FileIO.WriteTextAsync(testHtmlFile, libHtml);
+
+                RtfToHtmlViewer.Navigate(new Uri("ms-appdata:///local/TestFolder/rtftohtmltestpage.html"));
+            }
+            // 기존 제작 컨버터
+            //RichEditBoxTest.Document.GetText(Windows.UI.Text.TextGetOptions.FormatRtf, out string fvff);
+            //string htmlcode = await RtfToHtmlConverter.ParseRtfText(fvff);            
         }
 
         /// <summary>

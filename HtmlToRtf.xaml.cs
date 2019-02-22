@@ -40,6 +40,8 @@ namespace RichTextBoxResearch
             var rtfCode  = HtmlToRtfConverter.ParseHtmlText(rawHtmlCode);
             RawTextBlock.Text = rtfCode;
             RichEditBoxFromHtml.TextDocument.SetText(Windows.UI.Text.TextSetOptions.FormatRtf, rtfCode);
+
+            //RichEditBoxFromHtml.TextDocument.SetText(Windows.UI.Text.TextSetOptions.ApplyRtfDocumentDefaults, rawHtmlCode);
         }
     }
 }

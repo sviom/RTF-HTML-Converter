@@ -14,8 +14,12 @@ namespace RichTextBoxResearch
     /// </summary>
     public class HtmlToRtfConverter
     {
-        public const string DefaultHeader = "{\\rtf1 ";
+        public const string DefaultHeader = "{\\rtf1 \\fbidis \\ansi ";
         public const string DefaultFooter = " }";
+
+        public const string AttributeMatch = @"[_a-zA-z_0-9\-]+[:]+[_a-zA-z_0-9\-\s]+[;]";
+
+        public static List<CssClass> CssClasses { get; set; }
 
         public static string ParseHtmlText(string htmlText)
         {
@@ -27,12 +31,12 @@ namespace RichTextBoxResearch
 
             var htmlNode = htmlDoc.DocumentNode;
 
-            var cssClasses = new List<CssClass>();
+            CssClasses = new List<CssClass>();
             // Internal CSS 검색해서 미리 만들어 놓기
             var styleData = htmlNode.Descendants("style");
             var classAllMatch = @"([\.#][_A-Za-z0-9\-]+)[^}]*{[^}]*}";          // 클래스 전체
             var classNameMatch = @"[\.#][_A-Za-z0-9\-]+[^}]";                   // 클래스 이름만
-            var attributeMatch = @"[_a-zA-z_0-9\-]+[:]+[_a-zA-z_0-9\-\s]+[;]";  // Attribute 및 값 까지
+            //var attributeMatch = @"[_a-zA-z_0-9\-]+[:]+[_a-zA-z_0-9\-\s]+[;]";  // Attribute 및 값 까지
             foreach (var item in styleData)
             {
                 var styleInnerText = item.InnerText;
@@ -46,12 +50,12 @@ namespace RichTextBoxResearch
                     var classInnerText = m.Value;
 
                     var classNameReg = new Regex(classNameMatch);
-                    var attrReg = new Regex(attributeMatch);
+                    var attrReg = new Regex(AttributeMatch);
 
                     var matchResult = classNameReg.Matches(classInnerText);
                     var attrResult = attrReg.Matches(classInnerText);
 
-                    var cssClass = new CssClass() { ClassName = matchResult[0].Value.Trim().Replace(".","").Replace("#", "") };
+                    var cssClass = new CssClass() { ClassName = matchResult[0].Value.Trim().Replace(".", "").Replace("#", "") };
                     // Attribute 만들기
                     foreach (Match attrItem in attrResult)
                     {
@@ -75,7 +79,7 @@ namespace RichTextBoxResearch
                             }
                         }
                     }
-                    cssClasses.Add(cssClass);
+                    CssClasses.Add(cssClass);
                 }
             }
 
@@ -83,29 +87,106 @@ namespace RichTextBoxResearch
             var htmlAllNodes = htmlNode.Descendants();
             foreach (var nodeItem in htmlAllNodes)
             {
-                var nodeClassList = nodeItem.GetClasses();
-                foreach (var attribute in nodeItem.Attributes)
+                if (nodeItem.Name.Contains("div") || nodeItem.Name.Contains("span"))
                 {
-                    // 클래스면 기존 클래스의 내용들을 가져와서 적용 시켜 주어야 한다.
-                    if (attribute.Name == "class")
-                    {
-                        var nodeValue = nodeItem.InnerText;
-                        builder.Append(GetRtfCodeFromClass(cssClasses, attribute.Value, new StringBuilder(nodeValue)));
-                    }
-                    else
-                    {
-                        //builder.Append(RtfSpec.GetRtfCodeFromCss(attribute.Name, nodeItem.InnerText));
-                    }
+                    SetValueToRtf(nodeItem, ref builder);
+                    builder.Append(" \\par ");
                 }
             }
 
             builder.Append(DefaultFooter);
+            CssClasses.Clear();
             return builder.ToString();
         }
 
-        public static string GetRtfCodeFromClass(List<CssClass> cssClasses, string _className, StringBuilder nodeValue)
+        public static void SetValueToRtf(HtmlNode htmlNode, ref StringBuilder builder)
         {
-            foreach (var cssClass in cssClasses)
+            foreach (var attribute in htmlNode.Attributes)
+            {
+                if (attribute.Name == "style")
+                {
+                    var cssAttritues = new List<CssAttritue>();
+                    cssAttritues = GetAttributesInfo(attribute.Value);
+
+                    // 적용
+                    foreach (var cssAttritue in cssAttritues)
+                    {
+                        foreach (var cssValue in cssAttritue.CssValues)
+                        {
+                            var rtfTuple = RtfSpec.GetRtfCodeFromCss(cssAttritue.AttributeName, cssValue.Value);
+
+                            // 적용할 텍스트가 있는지 검사해서 있으면 적용
+                            if (htmlNode.FirstChild.Name.Equals("#text") && !string.IsNullOrEmpty(htmlNode.FirstChild.InnerText.Trim()))
+                            {
+                                var valueText = new StringBuilder(htmlNode.FirstChild.InnerText);
+
+                                valueText.Insert(0, rtfTuple.header);
+                                valueText.Append(rtfTuple.footer);
+
+                                builder.Append(valueText);
+                            }
+                        }
+                    }
+                }
+                else if (attribute.Name == "class")
+                {
+                    var rtfTuples = GetRtfCodeFromClasses(attribute.Value);
+
+                    // 적용할 텍스트가 있는지 검사해서 있으면 적용
+                    if (htmlNode.FirstChild.Name.Equals("#text") && !string.IsNullOrEmpty(htmlNode.FirstChild.InnerText.Trim()))
+                    {
+                        var valueText = new StringBuilder(htmlNode.FirstChild.InnerText);
+                        foreach (var rtfTuple in rtfTuples)
+                        {
+
+                            valueText.Insert(0, rtfTuple.header);
+                            valueText.Append(rtfTuple.footer);
+                        }
+                        builder.Append(valueText);
+                    }
+                }
+            }
+        }
+
+        public static List<CssAttritue> GetAttributesInfo(string attributeValue)
+        {
+            var cssAttritues = new List<CssAttritue>();
+            // Attribute Raw string 분해
+            var attrReg = new Regex(AttributeMatch);
+            var attrResult = attrReg.Matches(attributeValue);
+            // Attribute 만들기
+            foreach (Match attrItem in attrResult)
+            {
+                var dividerIndex = attrItem.Value.IndexOf(":");       // Attribute에서 :(콜론)으로 나뉘는 부분의 Index
+                var attr = attrItem.Value.Substring(0, dividerIndex).Trim();
+                var attrVal = attrItem.Value
+                                    .Substring(dividerIndex, attrItem.Value.Count() - dividerIndex)
+                                    .Trim()
+                                    .Replace(";", "").Replace(":", "")
+                                    .Split(null);
+
+                var cssAttritue = new CssAttritue() { AttributeName = attr };
+                //cssClass.CssAttritues.Add(cssAttritue);
+                cssAttritues.Add(cssAttritue);
+                // Value 만들기(Attribute value)
+                foreach (string valueItem in attrVal)
+                {
+                    if (!string.IsNullOrWhiteSpace(valueItem))
+                    {
+                        var cssValue = new CssValue() { Value = valueItem };
+                        cssAttritue.CssValues.Add(cssValue);
+                    }
+                }
+            }
+
+            return cssAttritues;
+        }
+
+        public static List<(string header, string footer)> GetRtfCodeFromClasses(string _className)
+        {
+            var ps = new List<(string header, string footer)>();
+            var rtfCode = (header: "", footer: "");
+            foreach (var cssClass in CssClasses)
             {
                 if (cssClass.ClassName.Equals(_className))
                 {
@@ -113,15 +194,14 @@ namespace RichTextBoxResearch
                     {
                         foreach (var cssValue in cssAttritue.CssValues)
                         {
-                            var rtfTuple = RtfSpec.GetRtfCodeFromCss(cssAttritue.AttributeName, cssValue.Value);
-                            nodeValue.Insert(0, rtfTuple.header);
-                            nodeValue.Append(rtfTuple.footer);
+                            rtfCode = RtfSpec.GetRtfCodeFromCss(cssAttritue.AttributeName, cssValue.Value);
+                            ps.Add(rtfCode);
                         }
                     }
                 }
             }
 
-            return nodeValue.ToString();
+            return ps;
         }
     }
 

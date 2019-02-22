@@ -64,7 +64,7 @@
                           RelativePanel.AlignRightWithPanel="True"
                           RelativePanel.AlignLeftWithPanel="True"
                           RelativePanel.Below="RtfRawTextTitle">
-                <TextBlock x:Name="RawTextBlock"></TextBlock>
+                <TextBox x:Name="RawTextBlock" IsReadOnly="True" TextWrapping="Wrap"></TextBox>
             </ScrollViewer>
 
 
